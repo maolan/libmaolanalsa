@@ -1,11 +1,8 @@
 #include <maolan/dynamichw.hpp>
 
-
 using namespace maolan;
 
-
-int main()
-{
+int main() {
   DynamicHW alsa{"./libmaolanalsa.so"};
 
   alsa.audio.out("AlsaAudioOut", "default", 4);

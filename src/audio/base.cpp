@@ -1,17 +1,14 @@
 #include <sstream>
 #include <string>
+
+#include <maolan/audio/alsa/base.hpp>
 #include <maolan/audio/input.hpp>
-
-#include "maolan/audio/base.hpp"
-
 
 using namespace maolan::audio;
 
-
-ALSA::ALSA(const std::string &name, const std::string &device, const snd_pcm_stream_t &stream, const size_t &sampleSize)
-  : HW{name, device}
-  , _sampleSize{sampleSize}
-{
+ALSA::ALSA(const std::string &name, const std::string &device,
+           const snd_pcm_stream_t &stream, const size_t &sampleSize)
+    : HW{name, device}, _sampleSize{sampleSize} {
   int rc;
   int dir;
   size_t size;
@@ -19,11 +16,13 @@ ALSA::ALSA(const std::string &name, const std::string &device, const snd_pcm_str
   struct pollfd pfd;
 
   // TODO: handle little endian
-  if (_sampleSize == 4) { _format = SND_PCM_FORMAT_S32_LE; }
-  else if (_sampleSize == 2) { _format = SND_PCM_FORMAT_S16_LE; }
-  else if (_sampleSize == 1) { _format = SND_PCM_FORMAT_S8; }
-  else
-  {
+  if (_sampleSize == 4) {
+    _format = SND_PCM_FORMAT_S32_LE;
+  } else if (_sampleSize == 2) {
+    _format = SND_PCM_FORMAT_S16_LE;
+  } else if (_sampleSize == 1) {
+    _format = SND_PCM_FORMAT_S8;
+  } else {
     std::stringstream s;
     s << "Unsupported sample size: " << _sampleSize << '\n';
     throw std::invalid_argument(s.str());
@@ -31,8 +30,7 @@ ALSA::ALSA(const std::string &name, const std::string &device, const snd_pcm_str
 
   /* Open PCM device for playback. */
   rc = snd_pcm_open(&_handle, _device.data(), SND_PCM_STREAM_PLAYBACK, 0);
-  if (rc < 0)
-  {
+  if (rc < 0) {
     fprintf(stderr, "unable to open pcm device: %s\n", snd_strerror(rc));
     exit(1);
   }
@@ -55,8 +53,7 @@ ALSA::ALSA(const std::string &name, const std::string &device, const snd_pcm_str
   val = 2;
   snd_pcm_hw_params_set_channels(_handle, _params, val);
   _outputs.resize(val);
-  for (int i = 0; i < val; ++i)
-  {
+  for (int i = 0; i < val; ++i) {
     _inputs.push_back(new Input());
   }
 
@@ -68,8 +65,7 @@ ALSA::ALSA(const std::string &name, const std::string &device, const snd_pcm_str
 
   /* Write the parameters to the driver */
   rc = snd_pcm_hw_params(_handle, _params);
-  if (rc < 0)
-  {
+  if (rc < 0) {
     fprintf(stderr, "unable to set hw parameters: %s\n", snd_strerror(rc));
     exit(1);
   }
@@ -84,23 +80,17 @@ ALSA::ALSA(const std::string &name, const std::string &device, const snd_pcm_str
   _fd = pfd.fd;
 }
 
-
-nlohmann::json ALSA::json()
-{
+nlohmann::json ALSA::json() {
   auto data = IO::json();
   data["bits"] = _sampleSize * 8;
   data["samplerate"] = Config::samplerate;
   return data;
 }
 
-
-ALSA::~ALSA()
-{
+ALSA::~ALSA() {
   snd_pcm_drain(_handle);
   snd_pcm_close(_handle);
   delete _bytes;
-
 }
-
 
 size_t ALSA::channels() const { return _outputs.size(); }

@@ -2,15 +2,13 @@
 #include <alsa/asoundlib.h>
 #include <nlohmann/json.hpp>
 
-#include "maolan/audio/hw.hpp"
+#include <maolan/audio/hw.hpp>
 
-
-namespace maolan::audio
-{
-class ALSA : public HW
-{
+namespace maolan::audio {
+class ALSA : public HW {
 public:
-  ALSA(const std::string &name, const std::string &device, const snd_pcm_stream_t &stream, const size_t &sampleSize);
+  ALSA(const std::string &name, const std::string &device,
+       const snd_pcm_stream_t &stream, const size_t &sampleSize);
   ~ALSA();
 
   virtual size_t channels() const;
@@ -24,4 +22,4 @@ protected:
   int8_t *_bytes;
   size_t _sampleSize;
 };
-}
+} // namespace maolan::audio

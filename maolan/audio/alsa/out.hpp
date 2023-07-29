@@ -1,13 +1,10 @@
 #pragma once
 #include <string>
 
-#include "maolan/audio/base.hpp"
+#include <maolan/audio/alsa/base.hpp>
 
-
-namespace maolan::audio
-{
-template <typename T> class ALSAOut : public ALSA
-{
+namespace maolan::audio {
+template <typename T> class ALSAOut : public ALSA {
 public:
   ALSAOut(const std::string &name, const std::string &device);
 
@@ -15,4 +12,4 @@ public:
   virtual void process();
   virtual void writehw();
 };
-}
+} // namespace maolan::audio
